@@ -36,7 +36,7 @@ cardano-cli stake-address build \
     --testnet-magic $CARDANO_NODE_MAGIC
 
 # Step 1e - Use faucet to load funds into the payment address (cat payment.addr)
-curl -XPOST "http[s]://$FQDN:$PORT/send-money/$ADDRESS"
+curl -XPOST "http[s]://$FQDN:$PORT/send-money/$(cat payment.addr)"
 
 
 ###################################################################################################
@@ -54,3 +54,15 @@ cardano-cli stake-address registration-certificate \
 # Step 2b - Create Transaction (to be used to submit the certificate)
 #         - requires -> finding the UTXO (hash and tx_id) to be used for the payment
 #         - requires -> finding the slot number the blockchain tip is currently at
+
+# find the UTXO hash and txid
+cardano-cli query utxo \
+    --address $(cat payment.addr) \
+    --testnet-magic $CARDANO_NODE_MAGIC
+#TODO #1 => needs the TxHash for largest ADA amount, plus TxId into variables
+
+# find the slotnumber that the tip of blockchain is up to
+cardano-cli query tip --mainnet
+#TODO #2 => needs the slot into a variable
+
+# build the transaction
