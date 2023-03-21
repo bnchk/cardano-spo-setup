@@ -65,4 +65,37 @@ cardano-cli query utxo \
 cardano-cli query tip --mainnet
 #TODO #2 => needs the slot into a variable
 
-# build the transaction
+# build the transaction (noting an additional step can be done to calculate the change exactly)
+cardano-cli transaction build \
+    --alonzo-era \
+    --tx-in b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee#1 \
+    --tx-out $(cat payment.addr)+1000000 \
+    --change-address $(cat payment.addr) \
+    --testnet-magic $CARDANO_NODE_MAGIC  \
+    --out-file tx.raw \
+    --certificate-file stake.cert \
+    --invalid-hereafter 987654 \
+    --witness-override 2
+#TODO #3 => integrate the variables from above
+
+# Step 2c - sign the transaction
+cardano-cli transaction sign \
+    --tx-body-file tx.raw \
+    --signing-key-file payment.skey \
+    --signing-key-file stake.skey \
+    --testnet-magic $CARDANO_NODE_MAGIC \
+    --out-file tx.signed
+
+# Step 2d - submit the transaction
+cardano-cli transaction submit \
+    --tx-file tx.signed \
+    --testnet-magic $CARDANO_NODE_MAGIC
+
+
+
+#TODO #4 => next up is maybe kes keys?  They get a bit sketchy here between videos and text guide
+
+# kes keys?
+# topology files?
+# 
+
