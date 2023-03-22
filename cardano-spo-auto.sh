@@ -11,14 +11,29 @@
 #######################
 # INITIALISATION
 #######################
-export DIR_HOME=`pwd`                     # define home directory as current script calling directory
-export DIR_ARCHIVE="$DIR_HOME/archived"   # define archive directory below this
+export HOME_DIR=`pwd`                     # define home directory as current script calling directory
+#export DIR_ARCHIVE="$HOME_DIR/archived"   # define archive directory below this
+export YYMD_HM=`date +"%Y%m%d_%H%M"`      # put program start timestamp in variable
+export RUN_DIR="$HOME_DIR/files_$YYMD_HM"   # define archive directory below this
+[ ! -d $RUN_DIR ] && mkdir $RUN_DIR && echo -e "Created: Run Directory - $RUN_DIR\n"  # create archive directory if it isn't there
+
+# DEFINE FILES
+export PAYMENT_VKEY=$RUN_DIR/payment.vkey
+export PAYMENT_SKEY=$RUN_DIR/payment.skey
+export STAKE_VKEY=$RUN_DIR/stake.vkey
+export STAKE_SKEY=$RUN_DIR/stake.skey
+export PAYMENT_WITH_STAKE_ADDR=$RUN_DIR/payment_wth_stake.addr
+export STAKE_ADDR=$RUN_DIR/stake.addr
+
+export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
+
 
 #######################
 # CLEANUP PREVIOUS RUNS
 #######################
-[ ! -d $DIR_ARCHIVE ] && mkdir $DIR_ARCHIVE
-
+#[ ! -d $DIR_ARCHIVE ] && mkdir $DIR_ARCHIVE && echo -e "Created: Archive Directory - $DIR_ARCHIVE\n"  # create archive directory if it isn't there
+#[ `ls -l $HOME_DIR/*.gz | wc -l | awk '{ print $1 }'` -gt 0 ] && mv $HOME_DIR/*.gz $HOME_DIR/*.gz && \
+#   echo -e "WARNING: Moved previous runs zip to archive - did last run crash\n"                         # create archive directory if it isn't there
 
 
 ###################################################################################################
@@ -29,30 +44,30 @@ export DIR_ARCHIVE="$DIR_HOME/archived"   # define archive directory below this
 
 # STEP 1a - Payment Key creation - same as for a wallet - payment key and secret signing key
 cardano-cli address key-gen \
-    --verification-key-file payment.vkey \
-    --signing-key-file payment.skey
+    --verification-key-file $PAYMENT_VKEY \
+    --signing-key-file      $PAYMENT_SKEY
 
 
 # Step 1b - Stake key pair generation
 cardano-cli stake-address key-gen \
-    --verification-key-file stake.vkey \
-    --signing-key-file stake.skey
+    --verification-key-file $STAKE_VKEY \
+    --signing-key-file      $STAKE_SKEY
 
 # Step 1c - Payment address generation (uses both the payment and stake public verification keys)
 cardano-cli address build \
-    --payment-verification-key-file payment.vkey \
-    --stake-verification-key-file stake.vkey \
-    --out-file payment.addr \
-    --testnet-magic $CARDANO_NODE_MAGIC
+    --payment-verification-key-file $PAYMENT_VKEY \
+    --stake-verification-key-file   $STAKE_VKEY \
+    --out-file                      $PAYMENT_WITH_STAKE_ADDR \
+    --testnet-magic                 $CARDANO_NODE_MAGIC
 
 # Step 1d - Stake address generation (only for where protocol rewards are sent automatically)
 cardano-cli stake-address build \
-    --stake-verification-key-file stake.vkey \
-    --out-file stake.addr \
-    --testnet-magic $CARDANO_NODE_MAGIC
+    --stake-verification-key-file $STAKE_VKEY \
+    --out-file                    $STAKE_ADDR \
+    --testnet-magic               $CARDANO_NODE_MAGIC
 
-# Step 1e - Use faucet to load funds into the payment address (cat payment.addr)
-curl -XPOST "http[s]://$FQDN:$PORT/send-money/$(cat payment.addr)"
+# Step 1e - Use faucet to load funds into the payment address
+curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
 
 
 ###################################################################################################
