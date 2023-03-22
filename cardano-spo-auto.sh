@@ -24,6 +24,9 @@ export STAKE_VKEY=$RUN_DIR/stake.vkey
 export STAKE_SKEY=$RUN_DIR/stake.skey
 export PAYMENT_WITH_STAKE_ADDR=$RUN_DIR/payment_wth_stake.addr
 export STAKE_ADDR=$RUN_DIR/stake.addr
+export STAKE_CERT=$RUN_DIR/stake.cert
+export TX_RAW=$RUN_DIR/tx.raw
+export TX_SIGNED=$RUN_DIR/tx.signed
 
 export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
 
@@ -79,8 +82,8 @@ curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
 
 # Step 2a - Registration Certificate creation
 cardano-cli stake-address registration-certificate \
-    --stake-verification-key-file stake.vkey \
-    --out-file stake.cert
+    --stake-verification-key-file $STAKE_VKEY \
+    --out-file s                  $STAKE_CERT
 
 # Step 2b - Create Transaction (to be used to submit the certificate)
 #         - requires -> finding the UTXO (hash and tx_id) to be used for the payment
@@ -88,7 +91,7 @@ cardano-cli stake-address registration-certificate \
 
 # find the UTXO hash and txid
 cardano-cli query utxo \
-    --address $(cat payment.addr) \
+    --address       $PAYMENT_WITH_STAKE_ADDR \
     --testnet-magic $CARDANO_NODE_MAGIC
 #TODO #1 => needs the TxHash for largest ADA amount, plus TxId into variables
 
