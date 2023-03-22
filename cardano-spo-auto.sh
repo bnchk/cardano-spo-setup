@@ -7,6 +7,7 @@
 #                                              #
 ################################################
 
+#TODO => Would need to make rundir above current directory because the repo loads all the files created otherwise!!!
 
 #######################
 # INITIALISATION
