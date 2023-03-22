@@ -2,7 +2,7 @@
 ################################################
 #                                              #
 #    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #
-#    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #
+#    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #  GAVE UP AS FAUCET APPEARS TO REQUIRE API KEY FOR FUNDS IN AUTO FORMAT
 #    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #
 #                                              #
 ################################################
@@ -30,7 +30,7 @@ export TX_SIGNED=$RUN_DIR/tx.signed
 
 export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
 
-
+exit
 #######################
 # CLEANUP PREVIOUS RUNS
 #######################
@@ -71,6 +71,7 @@ cardano-cli stake-address build \
 
 # Step 1e - Use faucet to load funds into the payment address
 curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
+curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)"
 
 
 ###################################################################################################
@@ -91,7 +92,7 @@ cardano-cli stake-address registration-certificate \
 
 # find the UTXO hash and txid
 cardano-cli query utxo \
-    --address       $PAYMENT_WITH_STAKE_ADDR \
+    --address       $(cat $PAYMENT_WITH_STAKE_ADDR) \
     --testnet-magic $CARDANO_NODE_MAGIC
 #TODO #1 => needs the TxHash for largest ADA amount, plus TxId into variables
 
