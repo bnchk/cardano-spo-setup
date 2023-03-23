@@ -12,7 +12,7 @@
 #######################
 # INITIALISATION
 #######################
-export HOME_DIR=`pwd`                     # define home directory as current script calling directory
+export HOME_DIR="~/workspace"              # define home directory for storage above this repo directory
 #export DIR_ARCHIVE="$HOME_DIR/archived"   # define archive directory below this
 export YYMD_HM=`date +"%Y%m%d_%H%M"`      # put program start timestamp in variable
 export RUN_DIR="$HOME_DIR/files_$YYMD_HM"   # define archive directory below this
@@ -29,9 +29,11 @@ export STAKE_CERT=$RUN_DIR/stake.cert
 export TX_RAW=$RUN_DIR/tx.raw
 export TX_SIGNED=$RUN_DIR/tx.signed
 
-export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
+#export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
+export FAUCET_FQDN="https://faucet.preview.world.dev.cardano.org/"
+export FAUCET_LOG=$RUN_DIR/faucet.log
 
-exit
+
 #######################
 # CLEANUP PREVIOUS RUNS
 #######################
@@ -50,12 +52,13 @@ exit
 cardano-cli address key-gen \
     --verification-key-file $PAYMENT_VKEY \
     --signing-key-file      $PAYMENT_SKEY
-
+[ $? <> 0 ] && echo -e "\nERROR EXIT - Payment key pair creation\n" && exit
 
 # Step 1b - Stake key pair generation
 cardano-cli stake-address key-gen \
     --verification-key-file $STAKE_VKEY \
     --signing-key-file      $STAKE_SKEY
+[ $? <> 0 ] && echo -e "\nERROR EXIT - Stake key pair creation\n" && exit
 
 # Step 1c - Payment address generation (uses both the payment and stake public verification keys)
 cardano-cli address build \
@@ -63,17 +66,20 @@ cardano-cli address build \
     --stake-verification-key-file   $STAKE_VKEY \
     --out-file                      $PAYMENT_WITH_STAKE_ADDR \
     --testnet-magic                 $CARDANO_NODE_MAGIC
+[ $? <> 0 ] && echo -e "\nERROR EXIT - Payment address creation\n" && exit
 
 # Step 1d - Stake address generation (only for where protocol rewards are sent automatically)
 cardano-cli stake-address build \
     --stake-verification-key-file $STAKE_VKEY \
     --out-file                    $STAKE_ADDR \
     --testnet-magic               $CARDANO_NODE_MAGIC
+[ $? <> 0 ] && echo -e "\nERROR EXIT - Stake protocol address creation\n" && exit
 
 # Step 1e - Use faucet to load funds into the payment address
-curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
-curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)"
+##curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
+curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=nohnuXahthoghaeNoht9Aow3ze4quohc" > $FAUCET_LOG 2>&1
 
+exit
 
 ###################################################################################################
 # STEP 2 - REGISTER STAKE CERTIFICATE WITH THE BLOCKCHAIN
