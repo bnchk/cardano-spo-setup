@@ -54,13 +54,13 @@ export FAUCET_LOG=$RUN_DIR/faucet.log
 cardano-cli address key-gen \
     --verification-key-file $PAYMENT_VKEY \
     --signing-key-file      $PAYMENT_SKEY
-[ $? -ne 0 ] && echo -e "\nERROR EXIT - Payment key pair creation\n" && exit
+[ $? -ne 0 ] && { echo -e "\nERROR EXIT - Payment key pair creation\n"; exit; } || { echo "Created: Payment key pair"; }
 
 # Step 1b - Stake key pair generation
 cardano-cli stake-address key-gen \
     --verification-key-file $STAKE_VKEY \
     --signing-key-file      $STAKE_SKEY
-[ $? -ne 0 ] && echo -e "\nERROR EXIT - Stake key pair creation\n" && exit
+[ $? -ne 0 ] && { echo -e "\nERROR EXIT - Stake key pair creation\n"; exit; } || { echo "Created: Stake key pair"; }
 
 # Step 1c - Payment address generation (uses both the payment and stake public verification keys)
 cardano-cli address build \
@@ -68,15 +68,15 @@ cardano-cli address build \
     --stake-verification-key-file   $STAKE_VKEY \
     --out-file                      $PAYMENT_WITH_STAKE_ADDR \
     --testnet-magic                 $CARDANO_NODE_MAGIC
-[ $? -ne 0 ] && echo -e "\nERROR EXIT - Payment address creation\n" && exit
+[ $? -ne 0 ] && { echo -e "\nERROR EXIT - Payment address creation\n"; exit; } || { echo "Created: Payment address"; }
 
 # Step 1d - Stake address generation (only for where protocol rewards are sent automatically)
 cardano-cli stake-address build \
     --stake-verification-key-file $STAKE_VKEY \
     --out-file                    $STAKE_ADDR \
     --testnet-magic               $CARDANO_NODE_MAGIC
-[ $? -ne 0 ] && echo -e "\nERROR EXIT - Stake protocol address creation\n" && exit
-
+[ $? -ne 0 ] && { echo -e "\nERROR EXIT - Stake protocol address creation\n"; exit; } || { echo "Created: Stake protocol address"; }
+exit
 # Step 1e - Use faucet to load funds into the payment address
 ##curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
 curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=nohnuXahthoghaeNoht9Aow3ze4quohc" >$FAUCET_LOG 2>&1
