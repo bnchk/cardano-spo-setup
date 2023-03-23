@@ -15,7 +15,8 @@
 export HOME_DIR="/config/workspace"              # define home directory for storage above this repo directory
 #export DIR_ARCHIVE="$HOME_DIR/archived"   # define archive directory below this
 export YYMD_HM=`date +"%Y%m%d_%H%M"`      # put program start timestamp in variable
-export RUN_NUM=$(ls -l $HOME_DIR | grep ^d | awk '{print $9}' | grep ^run | cut -c4-5 | sort | tail -1 | sed 's/^0*//g' | { read -r -t1 val && echo $val || echo 0 ; })  | expr $cat + 1 | printf "%02d\n")
+export RUN_NUM=`ls -l $HOME_DIR | grep ^d | awk '{print $9}' | grep ^run | cut -c4-5 | sort | tail -1 | sed 's/^0*//g' | { read -r -t1 val && echo $val || echo 0 ; } | awk '{ print $1+1}' | awk '{ print "0" $1}' | rev | cut -c1-2 | rev`
+echo "RUN: $RUN_NUM"
 export RUN_DIR="${HOME_DIR}/run${RUN_NUM}_${YYMD_HM}"   # define archive directory below this
 [ ! -d $RUN_DIR ] && mkdir $RUN_DIR && echo -e "Created: Run Directory - $RUN_DIR"  # create archive directory if it isn't there
 
