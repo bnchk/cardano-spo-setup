@@ -15,7 +15,10 @@
 export HOME_DIR="/config/workspace"              # define home directory for storage above this repo directory
 #export DIR_ARCHIVE="$HOME_DIR/archived"   # define archive directory below this
 export YYMD_HM=`date +"%Y%m%d_%H%M"`      # put program start timestamp in variable
-export RUN_NUM=`ls -l $HOME_DIR | grep ^d | awk '{print $9}' | grep ^run | cut -c4-5 | sort | tail -1 | sed 's/^0*//g' | { read -r -t1 val && echo $val || echo 0 ; } | awk '{ print $1+1}' | awk '{ print "0" $1}' | rev | cut -c1-2 | rev`
+# determine next (or first) run number in 2digit form with leading zero
+export RUN_NUM=`ls -l $HOME_DIR | grep ^d | awk '{print $9}' | grep ^run | cut -c4-5 | \
+                sort | tail -1 | sed 's/^0*//g' | { read -r -t1 val && echo $val || echo 0 ; } | \
+                awk '{ print $1+1}' | awk '{ print "0" $1}' | rev | cut -c1-2 | rev`
 echo "RUN: $RUN_NUM"
 export RUN_DIR="${HOME_DIR}/run${RUN_NUM}_${YYMD_HM}"   # define archive directory below this
 [ ! -d $RUN_DIR ] && mkdir $RUN_DIR && echo -e "Created: Run Directory - $RUN_DIR"  # create archive directory if it isn't there
@@ -32,8 +35,9 @@ export TX_RAW=$RUN_DIR/tx.raw
 export TX_SIGNED=$RUN_DIR/tx.signed
 
 #export FAUCET_FQDN="https://docs.cardano.org/cardano-testnet/tools/faucet"
-export FAUCET_FQDN="https://faucet.preview.world.dev.cardano.org/"
+export FAUCET_FQDN="https://faucet.preview.world.dev.cardano.org"
 export FAUCET_LOG=$RUN_DIR/faucet.log
+export FAUCET_API="nohnuXahthoghaeNoht9Aow3ze4quohc"
 
 
 #######################
@@ -79,8 +83,9 @@ cardano-cli stake-address build \
 exit
 # Step 1e - Use faucet to load funds into the payment address
 ##curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
-curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=nohnuXahthoghaeNoht9Aow3ze4quohc" >$FAUCET_LOG 2>&1
-cat $FAUCET_LOG
+curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=${FAUCET_API}" >$FAUCET_LOG 2>&1
+[ `tail -1 $FAUCET_LOG | grep amount | grep lovelace | grep txid | wc -l` -ne 1 ] && \
+    { echo -e "\nERROR EXIT - Faucet Payment rejected\n"; exit; } || { echo "Deposit: Faucet tADA transferred"; }
 exit
 
 ###################################################################################################
