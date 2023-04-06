@@ -38,6 +38,22 @@ cardano-cli stake-address build \
 # Step 1e - Use faucet to load funds into the payment address (cat payment.addr)
 curl -XPOST "http[s]://$FQDN:$PORT/send-money/$(cat payment.addr)"
 
+# Step 1f - Generate Cold keys (in production would create on isolated machine not connected to internet
+#                                and would manually copy public keys only across on USB stick)
+cardano-cli node key-gen \
+    --cold-verification-key-file cold.vkey \
+    --cold-signing-key-file cold.skey \
+    --operational-certificate-issue-counter-file opcert.counter
+
+# Step 1g - Generate KES (Key Evolving Signature) keys
+cardano-cli node key-gen-KES \
+    --verification-key-file kes.vkey \
+    --signing-key-file kes.skey
+
+# Step 1h - Generate VRF (Verifiable Random Function) keys
+cardano-cli node key-gen-VRF \
+   --verification-key-file vrf.vkey \
+   --signing-key-file vrf.skey
 
 ###################################################################################################
 # STEP 2 - REGISTER STAKE CERTIFICATE WITH THE BLOCKCHAIN

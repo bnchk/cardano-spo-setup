@@ -30,6 +30,13 @@ export STAKE_VKEY=$RUN_DIR/stake.vkey
 export STAKE_SKEY=$RUN_DIR/stake.skey
 export PAYMENT_WITH_STAKE_ADDR=$RUN_DIR/payment_wth_stake.addr
 export STAKE_ADDR=$RUN_DIR/stake.addr
+export COLD_VKEY=$RUN_DIR/cold.vkey
+export COLD_SKEY=$RUN_DIR/cold.skey
+export KES_VKEY=$RUN_DIR/kes.vkey
+export KES_SKEY=$RUN_DIR/kes.skey
+export VRF_VKEY=$RUN_DIR/vrf.vkey
+export VRF_SKEY=$RUN_DIR/vrf.skey
+export OPERATIONAL_CERT=$RUN_DIR/opcert.cert
 export STAKE_CERT=$RUN_DIR/stake.cert
 export TX_RAW=$RUN_DIR/tx.raw
 export TX_SIGNED=$RUN_DIR/tx.signed
@@ -83,10 +90,33 @@ cardano-cli stake-address build \
 exit
 # Step 1e - Use faucet to load funds into the payment address
 ##curl -v -XPOST "$FAUCET_FQDN/send-money/$PAYMENT_WITH_STAKE_ADDR"
-curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=${FAUCET_API}" >$FAUCET_LOG 2>&1
-[ `tail -1 $FAUCET_LOG | grep amount | grep lovelace | grep txid | wc -l` -ne 1 ] && \
-    { echo -e "\nERROR EXIT - Faucet Payment rejected\n"; exit; } || { echo "Deposit: Faucet tADA transferred"; }
+#curl -v -XPOST "$FAUCET_FQDN/send-money/$(cat $PAYMENT_WITH_STAKE_ADDR)?api_key=${FAUCET_API}" >$FAUCET_LOG 2>&1
+#[ `tail -1 $FAUCET_LOG | grep amount | grep lovelace | grep txid | wc -l` -ne 1 ] && \
+#    { echo -e "\nERROR EXIT - Faucet Payment rejected\n"; exit; } || { echo "Deposit: Faucet tADA transferred"; }
+
 exit
+
+
+# Step 1f - Generate Cold keys (in production would create on isolated machine not connected to internet
+#                                and would manually copy public keys only across on USB stick)
+cardano-cli node key-gen \
+    --cold-verification-key-file $COLD_VKEY \
+    --cold-signing-key-file      $COLD_SKEY \
+    --operational-certificate-issue-counter-file $OPERATIONAL_CERT
+
+# Step 1g - Generate KES (Key Evolving Signature) keys
+cardano-cli node key-gen-KES \
+    --verification-key-file $KES_VKEY \
+    --signing-key-file      $KES_SKEY
+
+# Step 1h - Generate VRF (Verifiable Random Function) keys
+cardano-cli node key-gen-VRF \
+   --verification-key-file $VRF_VKEY \
+   --signing-key-file      $VRF_SKEY
+
+
+
+
 
 ###################################################################################################
 # STEP 2 - REGISTER STAKE CERTIFICATE WITH THE BLOCKCHAIN
