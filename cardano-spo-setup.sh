@@ -113,5 +113,6 @@ cardano-cli transaction submit \
 
 # kes keys?
 # topology files?
-# 
+# or use the new guide I found which has different order, different commands?
+# but then itself is missing a step about the opcert generation vs issue counter generation
 
