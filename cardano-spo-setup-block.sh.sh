@@ -3,6 +3,8 @@
 #                              #
 #  CARDANO SPO SETUP COMMANDS  #
 #  BLOCK PRODUCER              #
+#  NB Never production this is #
+#     cutback insecure process #
 #                              #
 ################################
 
