@@ -1,11 +1,12 @@
 #!/usr/bin/bash
-################################################
-#                                              #
-#    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #
-#    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #  GAVE UP AS FAUCET APPEARS TO REQUIRE API KEY FOR FUNDS IN AUTO FORMAT
-#    CARDANO SPO SETUP - PARTIALLY AUTOMATED   #
-#                                              #
-################################################
+################################
+#                              #
+#  CARDANO SPO SETUP COMMANDS  #
+#  BLOCK PRODUCER - AUTOMATED  #
+#  NB Never production this is #
+#     cutback insecure process #
+#                              #
+################################
 
 #TODO => Would need to make rundir above current directory because the repo loads all the files created otherwise!!!
 
